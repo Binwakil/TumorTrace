@@ -1,0 +1,101 @@
+protocol_version: tumortrust_vlm_decoder_comparison_v1
+status: development_locked_before_training
+purpose: >-
+  Test whether decoder scale and general-versus-biomedical language pretraining rescue grounded
+  reporting while holding TumorTrust's OOF 3D visual tokens and structured evidence fixed.
+
+models:
+  - public_name: LLaVA-v1.5/Vicuna-7B
+    local_path: ../shared/models/llava-v1.5-7b
+    decoder_family: llama
+    scientific_role: general_pretrained_language_decoder
+  - public_name: LLaVA-Med-v1.5/Mistral-7B
+    local_path: ../shared/models/llava-med-v1.5-mistral-7b
+    decoder_family: mistral
+    scientific_role: biomedical_pretrained_language_decoder
+
+excluded_model:
+  public_name: AutoRG-Brain
+  decision: unavailable_checkpoint_skip
+
+data:
+  train_records: artifacts/private/reporter_records_train.json
+  validation_records: artifacts/private/reporter_records_val.json
+  expected_train_subjects: 482
+  expected_validation_subjects: 69
+  final_report_subjects: 141
+  final_test_status: locked_until_protocol_freeze
+
+matched_training:
+  modes:
+    - text_only
+    - evidence_only
+    - full
+  epochs: 3
+  batch_size: 1
+  accumulation_steps: 8
+  maximum_length: 256
+  learning_rate: 0.0002
+  seed: 20260810
+  prefix_tokens: 8
+  context_dim: 512
+  lora_rank: 8
+  lora_alpha: 16
+  lora_target_modules:
+    - q_proj
+    - v_proj
+  frozen_components:
+    - language_backbone_except_lora
+    - segmentation_core
+    - classification_core
+    - original_llava_vision_tower
+    - original_llava_multimodal_projector
+
+development_evaluation:
+  decoding: greedy
+  maximum_new_tokens: 128
+  required_outputs:
+    - unconstrained
+    - deterministic_schema_prefixed
+    - targeted_evidence_swap
+    - image_swap
+    - zero_visual_tokens
+    - light_visual_perturbation
+  primary_metrics:
+    - structured_finding_f1
+    - laterality_f1
+    - unsupported_claim_rate
+    - contradiction_rate
+    - evidence_intervention_accuracy
+    - dominant_template_fraction
+  secondary_metrics:
+    - bleu
+    - rouge_l
+    - bertscore
+    - radgraph
+    - radcliq
+    - ratescore
+
+decision_gates:
+  structured_finding_f1_minimum: 0.90
+  unsupported_claim_rate_maximum: 0.05
+  contradiction_rate_maximum: 0.02
+  evidence_intervention_accuracy_minimum: 0.90
+  full_minus_text_only_f1_minimum: 0.10
+  dominant_template_fraction_maximum: 0.10
+  full_vs_evidence_only: >-
+    At least 0.02 absolute structured-finding F1 improvement or at least 20 percent relative
+    unsupported-claim reduction, with the paired confidence interval excluding zero.
+
+stop_rules:
+  - No hyperparameter search after validation results.
+  - No automatic curriculum or adapter rescue experiment.
+  - Freeze one retained learned condition only if it passes the prespecified development gates.
+  - Retain deterministic reporting and demote the learned VLM if neither decoder passes.
+  - Do not open the final test until every retained component and analysis rule is frozen.
+
+radiologist_validation:
+  status: optional_enhancement
+  no_collaborator_claim_limit: >-
+    Describe the output as a research evidence/reporting framework and do not claim clinical
+    validation, diagnostic safety, or demonstrated clinical utility.

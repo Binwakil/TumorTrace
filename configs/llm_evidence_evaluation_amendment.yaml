@@ -1,0 +1,35 @@
+amendment_version: tumortrust_evidence_llm_evaluation_amendment_v1
+status: frozen_after_69_base_outputs_and_22_of_544_interventions
+base_protocol: configs/llm_evidence_reporter.yaml
+reason: >-
+  The legacy evidence parser recognized only renderer-specific long labels and punctuation. The
+  zero-shot reporter preserved the correct evidence using concise labels such as "WT 274.808 mL"
+  and natural copular wording such as "tumor family is GLI", causing a false structured-field
+  omission despite the values being visibly present. This was detected before intervention
+  evaluation completed.
+change:
+  evidence_extractor_version: structured_evidence_fields_v2
+  accepted_equivalents:
+    - WT/TC/ET/SNFH abbreviations followed by numeric mL values
+    - tumor-family colon, "is", "of", and family-first model-predicted wording
+    - numeric or conservative word-form component counts with optional spatial adjectives/hyphens
+    - explicit "none" laterality for zero-volume evidence cards
+unchanged:
+  - model
+  - prompt
+  - base_outputs
+  - intervention_outputs
+  - evidence cards
+  - reference reports
+  - metrics and decision gates
+  - development-only scope
+  - final-test exclusion
+operational_execution:
+  concurrent_workers: 4
+  rationale: >-
+    The independent API calls were resumed with four workers after 46 of 544 interventions to
+    reduce wall-clock time. Prompt content, donor pairing, output limits, and scoring are unchanged;
+    per-call latency and token usage remain recorded individually.
+fairness_rule: >-
+  Recompute structured evidence metrics for the deterministic renderer, all six matched 7B
+  conditions, and GPT-5.6 Sol with the same v2 extractor before comparison.

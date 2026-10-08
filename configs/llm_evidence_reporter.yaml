@@ -1,0 +1,97 @@
+protocol_version: tumortrust_evidence_llm_reporter_v1
+status: frozen_before_execution
+scope: development_report_validation_only
+scientific_role: >-
+  Zero-shot proprietary language-decoder comparator testing whether a current general LLM can
+  verbalize the same frozen structured evidence more faithfully than the fine-tuned 7B reporters.
+
+model:
+  public_name: GPT-5.6 Sol
+  api_model_id: gpt-5.6-sol
+  api: responses
+  fine_tuned: false
+  reasoning_effort: none
+  maximum_output_tokens: 256
+  store: false
+
+data:
+  records: artifacts/private/reporter_records_val.json
+  expected_subjects: 69
+  expected_split: val
+  final_test_status: excluded
+  transmitted_fields:
+    - schema_version
+    - tumor_family_probabilities
+    - predicted_family
+    - volumes
+    - component_count
+    - laterality
+    - segmentation_uncertainty
+    - classification_uncertainty
+    - referral
+    - referral_reasons
+    - unavailable_fields
+  prohibited_transmission:
+    - subject_id
+    - source_subject_identifier
+    - report_text
+    - normalized_reference_findings
+    - MRI_voxels
+    - visual_tokens
+    - source_paths
+
+decoding:
+  prompt_version: tumortrust_evidence_verbalizer_v1
+  policy: >-
+    Generate one concise findings paragraph using only supplied evidence. Preserve exact numeric
+    values, label every family as model-predicted, do not infer absent imaging findings, and do not
+    provide treatment advice.
+
+evaluation:
+  primary_metrics:
+    - structured_field_recall
+    - structured_field_unsupported_rate
+    - structured_field_contradiction_rate
+    - targeted_evidence_intervention_accuracy
+  secondary_metrics:
+    - structured_finding_micro_f1
+    - structured_laterality_micro_f1
+    - bleu_1
+    - bleu_4
+    - rouge_l
+    - dominant_template_fraction
+  efficiency_metrics:
+    - input_tokens
+    - output_tokens
+    - sequential_latency_seconds
+    - estimated_api_cost_usd
+  targeted_intervention:
+    batch_size: 4
+    workers: 4
+    donor_policy: rotate_previous_within_batch
+    fields:
+      - family
+      - volume_WT
+      - volume_TC
+      - volume_ET
+      - volume_SNFH
+      - laterality
+      - component_count
+      - referral
+
+decision_gates:
+  structured_field_recall_minimum: 0.90
+  unsupported_claim_rate_maximum: 0.05
+  contradiction_rate_maximum: 0.02
+  evidence_intervention_accuracy_minimum: 0.90
+
+pricing_snapshot:
+  source: official_openai_model_catalog_checked_2026-08-23
+  input_usd_per_million_tokens: 4.0
+  output_usd_per_million_tokens: 20.0
+
+interpretation_limits:
+  - This is a zero-shot API comparator, whereas the 7B VLM reporters were LoRA-fine-tuned locally.
+  - It receives structured evidence only and cannot establish visual grounding.
+  - API latency and monetary cost are not directly comparable to local GPU training or inference.
+  - No clinical-validity claim is permitted without radiologist review.

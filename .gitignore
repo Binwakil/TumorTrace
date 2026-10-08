@@ -1,0 +1,46 @@
+# This is the public-release branch. Everything subject-level, pre-publication, or
+# internal-process stays out by default -- see README.md's Data and reproducibility section.
+# The only binary model files tracked here are the three retained checkpoints under
+# checkpoints/, via Git LFS (see .gitattributes) -- not the outputs/ directory below.
+
+# Clinical data, generated subject-level artifacts, and result artifacts
+artifacts/
+data/raw/
+data/processed/
+reports/private/
+
+# Training outputs and logs (every run except the three retained checkpoints)
+outputs/
+checkpoints_*/
+results/predictions/
+logs/
+logs_*.log
+*.log
+*.out
+*.err
+
+# Internal process, planning, governance docs, and pre-submission manuscript material
+ANALYSIS.md
+PLAN.md
+TODO.md
+MILESTONES.md
+IMPLEMENTATION_LOG.md
+Q1_RESEARCH_ROADMAP.md
+CODEX_STATUS_HANDOFF*.md
+OVERNIGHT_*.md
+Manuscript/
+docs/
+
+# Python/editor caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+.idea/
+.vscode/
+
+# Local configuration and secrets
+.env
+configs/local*.yaml

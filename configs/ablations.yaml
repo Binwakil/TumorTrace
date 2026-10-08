@@ -1,0 +1,111 @@
+experiments:
+  - id: S1
+    operation: train
+    overrides: {model.joint_weighting: segmentation_only}
+  - id: C0
+    operation: train
+    compare_to: S1
+    expected_changed_fields: [model.joint_weighting]
+    overrides: {model.joint_weighting: classification_only}
+  - id: M0
+    operation: train
+    compare_to: S1
+    expected_changed_fields: [model.joint_weighting]
+    overrides: {model.joint_weighting: fixed}
+  - id: M1
+    operation: train
+    compare_to: M0
+    expected_changed_fields: [model.joint_weighting]
+    overrides: {model.joint_weighting: pcgrad}
+  - id: M1_uncertainty_weighting
+    operation: train
+    compare_to: M0
+    expected_changed_fields: [model.joint_weighting]
+    overrides: {model.joint_weighting: uncertainty}
+  - id: D3_zscore
+    operation: train
+    compare_to: S1
+    expected_changed_fields: [data.normalization]
+    overrides: {data.normalization: zscore_nonzero, model.joint_weighting: segmentation_only}
+  - id: D2_no_brain_crop
+    operation: evaluate
+    compare_to: S1
+    expected_changed_fields: [data.brain_crop_margin]
+    overrides: {data.brain_crop_margin: null}
+  - id: D4_drop_t1n
+    operation: evaluate
+    compare_to: S1
+    expected_changed_fields: [data.force_missing_modality]
+    overrides: {data.force_missing_modality: t1n}
+  - id: D4_drop_t1c
+    operation: evaluate
+    compare_to: S1
+    expected_changed_fields: [data.force_missing_modality]
+    overrides: {data.force_missing_modality: t1c}
+  - id: D4_drop_t2w
+    operation: evaluate
+    compare_to: S1
+    expected_changed_fields: [data.force_missing_modality]
+    overrides: {data.force_missing_modality: t2w}
+  - id: D4_drop_t2f
+    operation: evaluate
+    compare_to: S1
+    expected_changed_fields: [data.force_missing_modality]
+    overrides: {data.force_missing_modality: t2f}
+  - id: D4_with_modality_dropout
+    operation: train
+    compare_to: S1
+    expected_changed_fields: [data.missing_modality_probability]
+    overrides: {data.missing_modality_probability: 0.15, model.joint_weighting: segmentation_only}
+  - id: SHIFT_noise
+    operation: evaluate
+    compare_to: S1
+    expected_changed_fields: [data.robustness_shift]
+    overrides: {data.robustness_shift: gaussian_noise}
+  - id: SHIFT_intensity
+    operation: evaluate
+    compare_to: S1
+    expected_changed_fields: [data.robustness_shift]
+    overrides: {data.robustness_shift: intensity_scale}
+  - id: SHIFT_bias_field
+    operation: evaluate
+    compare_to: S1
+    expected_changed_fields: [data.robustness_shift]
+    overrides: {data.robustness_shift: bias_field}
+  - id: SHIFT_resolution
+    operation: evaluate
+    compare_to: S1
+    expected_changed_fields: [data.robustness_shift]
+    overrides: {data.robustness_shift: lower_resolution}
+  - id: A1_background_only
+    operation: train
+    compare_to: C0
+    # training.amp is a declared second changed field for a numerical-stability reason, not a
+    # scientific variable: background_only zeros every tumor voxel while extract_patch still biases
+    # 75% of patches toward the former tumor location using the unmasked segmentation, so most
+    # training patches contain a large contiguous exactly-zero region. Under fp16 autocast this
+    # produced NaN loss by epoch 7 in the original 2026-08-12 launch (preserved at
+    # artifacts/private/invalid_runs/A1_background_only_nan_20260812/); disabling AMP resolved it in
+    # a 7-epoch diagnostic rerun. This does not change what the ablation measures.
+    expected_changed_fields: [data.input_view, training.amp]
+    overrides: {data.input_view: background_only, model.joint_weighting: classification_only, project.control_scope: ground_truth_mask_oracle_diagnostic, training.amp: false}
+  - id: A2_tumor_only
+    operation: train
+    compare_to: C0
+    # training.amp: false for the same numerical-stability reason as A1_background_only above --
+    # tumor_only zeros the background instead, which is the same large-constant-region risk profile
+    # (often a larger zeroed fraction for small lesions), pre-emptively fixed rather than waiting for
+    # the same NaN failure.
+    expected_changed_fields: [data.input_view, training.amp]
+    overrides: {data.input_view: tumor_only, model.joint_weighting: classification_only, project.control_scope: ground_truth_mask_oracle_diagnostic, training.amp: false}
+  - id: A3_uncanonicalized
+    operation: train
+    compare_to: C0
+    expected_changed_fields: [data.canonicalize]
+    overrides: {data.canonicalize: false, model.joint_weighting: classification_only}
+  - id: M2_separate_encoder
+    operation: train
+    trigger: only_if_shared_multitask_negative_transfer
+    compare_to: M0
+    expected_changed_fields: [model.architecture]
+    overrides: {model.architecture: separate_encoder_segresnet, model.joint_weighting: fixed}

@@ -1,0 +1,16 @@
+experiment:
+  id: S6_auxiliary_burden
+  primary: deterministic_predicted_mask_volumetry
+  comparator: posthoc_mlp_on_frozen_full_volume_global_3d_features
+  mask_derived_volume_used_as_input: false
+  regions: [WT, TC, ET, SNFH]
+  target_transform: log1p
+  loss: smooth_l1
+  selection_metric: validation_log_volume_loss
+  train_script: scripts/train_burden_head.py
+  evaluation_script: scripts/evaluate_burden_head.py
+  required_inputs:
+    - frozen_core_train_features
+    - frozen_core_validation_features
+    - train_mask_derived_target_volumes
+    - validation_mask_derived_target_volumes

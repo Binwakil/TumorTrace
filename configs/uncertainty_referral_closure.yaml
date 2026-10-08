@@ -1,0 +1,47 @@
+protocol_version: 1
+frozen_at: "2026-08-22T13:31:00-04:00"
+scope: development_only
+locked_final_test_opened: false
+
+failure_definition:
+  metric: macro_dice
+  error: one_minus_macro_dice
+  failure_error_threshold: 0.20
+
+candidate_signals:
+  - method: entropy
+    signal: predictive_entropy
+    artifact: artifacts/development_uncertainty_entropy.json
+  - method: mc_dropout10
+    signal: mutual_information
+    artifact: artifacts/development_uncertainty_mc_dropout10.json
+  - method: deep_ensemble3
+    signal: mutual_information
+    artifact: artifacts/development_uncertainty_deep_ensemble3.json
+
+selection:
+  primary: highest_iid_failure_auroc
+  tie_breakers:
+    - highest_relative_risk_reduction_at_80pct_coverage
+    - method_name_ascending
+  note: >-
+    The signal paired with each method is fixed above before any matched IID uncertainty result is
+    available. The selected candidate is evaluated under every preregistered shift even if no IID
+    candidate clears the retention gates, so a negative trust closure remains auditable.
+
+retention_gates:
+  iid_failure_detection_auroc_minimum: 0.80
+  relative_risk_reduction_at_80pct_coverage_minimum: 0.20
+  random_referral_p_value_maximum: 0.05
+  shift_detection_auroc_minimum_each: 0.75
+
+preregistered_shifts:
+  noise: artifacts/private/m5_robustness/configs/shift_noise.yaml
+  intensity: artifacts/private/m5_robustness/configs/shift_intensity.yaml
+  bias_field: artifacts/private/m5_robustness/configs/shift_bias_field.yaml
+  resolution: artifacts/private/m5_robustness/configs/shift_resolution.yaml
+
+failure_action: >-
+  If every retention gate does not pass, do not freeze a referral threshold, do not expose a
+  binary referral decision on the locked test, and frame uncertainty as a development diagnostic
+  rather than reliable failure or shift detection.

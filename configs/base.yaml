@@ -1,0 +1,62 @@
+project:
+  name: TumorTrust-VLM
+  seed: 20260810
+  output_dir: outputs/base
+
+data:
+  dataset_root: /data/Projects/llava-tumor-baseline/AutoRG-Brain/Dataset
+  report_meta: /data/Projects/llava-tumor-baseline/AutoRG-Brain/report_meta
+  report_split: /data/Projects/llava-tumor-baseline/AutoRG-Brain/split_meta/train_val_test_split.json
+  inventory: artifacts/private/master_inventory.json
+  split_manifest: artifacts/private/master_split.json
+  cache_dir: artifacts/private/cache
+  cache_splits: [train, val]
+  modalities: [t1n, t1c, t2w, t2f]
+  target_spacing: [1.0, 1.0, 1.0]
+  patch_size: [128, 128, 128]
+  brain_crop_margin: 8
+  normalization: robust_nonzero
+  common_regions: [WT]
+  label_mode: cohort_native_4class
+  num_workers: 4
+  class_balanced_sampler: true
+  missing_modality_probability: 0.0
+  robustness_shift: none
+
+model:
+  architecture: multitask_segresnet
+  in_channels: 4
+  out_channels: 4
+  init_filters: 16
+  dropout: 0.2
+  classification_classes: 3
+  joint_weighting: fixed
+  lambda_cls: 0.2
+
+training:
+  epochs: 300
+  batch_size: 1
+  accumulation_steps: 2
+  learning_rate: 0.0002
+  weight_decay: 0.00001
+  scheduler: cosine
+  amp: true
+  positive_patch_probability: 0.75
+  validate_every: 10
+  patience: 50
+  max_steps_per_epoch: 250
+  max_validation_cases: null
+  full_validation_during_training: false
+  patch_validation: false
+
+inference:
+  sliding_window_overlap: 0.5
+  sw_batch_size: 1
+
+evaluation:
+  include_final_test: false
+  regions: [WT, TC, ET, SNFH]
+  bootstrap_samples: 2000
+  component_min_volume_mm3: 100
+  small_lesion_max_volume_mm3: 1000
+  ece_bins: 15

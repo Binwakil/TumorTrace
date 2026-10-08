@@ -1,0 +1,55 @@
+project:
+  name: TumorTrust-VLM-smoke
+  seed: 7
+  output_dir: outputs/smoke
+data:
+  dataset_root: /data/Projects/llava-tumor-baseline/AutoRG-Brain/Dataset
+  report_meta: /data/Projects/llava-tumor-baseline/AutoRG-Brain/report_meta
+  report_split: /data/Projects/llava-tumor-baseline/AutoRG-Brain/split_meta/train_val_test_split.json
+  inventory: artifacts/private/master_inventory.json
+  split_manifest: artifacts/private/master_split.json
+  cache_dir: null
+  cache_splits: [train, val]
+  modalities: [t1n, t1c, t2w, t2f]
+  target_spacing: [1.0, 1.0, 1.0]
+  patch_size: [32, 32, 32]
+  brain_crop_margin: 4
+  normalization: robust_nonzero
+  common_regions: [WT]
+  label_mode: cohort_native_4class
+  num_workers: 0
+  class_balanced_sampler: false
+  missing_modality_probability: 0.0
+  robustness_shift: none
+model:
+  architecture: multitask_segresnet
+  in_channels: 4
+  out_channels: 4
+  init_filters: 8
+  dropout: 0.1
+  classification_classes: 3
+  joint_weighting: fixed
+  lambda_cls: 0.2
+training:
+  epochs: 1
+  batch_size: 1
+  accumulation_steps: 1
+  learning_rate: 0.0002
+  weight_decay: 0.00001
+  scheduler: cosine
+  amp: true
+  positive_patch_probability: 0.75
+  validate_every: 1
+  patience: 2
+  max_steps_per_epoch: 2
+  max_validation_cases: 1
+  patch_validation: true
+inference:
+  sliding_window_overlap: 0.25
+  sw_batch_size: 1
+evaluation:
+  include_final_test: false
+  regions: [WT, TC, ET, SNFH]
+  bootstrap_samples: 100
+  component_min_volume_mm3: 100
+  ece_bins: 10

@@ -1,0 +1,31 @@
+implementation:
+  package: radeval
+  version: 2.2.1
+  package_sdist_sha256: a6f846420b87f600a211973455671e6b0e504ade30515d1129f5cf3d2f279633
+  source: https://github.com/jbdel/RadEval
+  upstream_documentation_commit_audited: 0b2a27e737f7cf1ecd677faa8dfdd76338d05deb
+  runtime_compatibility: >-
+    On case-sensitive Linux, alias the imported radeval 2.2.1 module as RadEval because the
+    package's vendored RadGraph code uses that capitalized absolute import. No package files or
+    scoring logic are changed.
+  isolated_environment: environment-report-metrics.yml
+  exact_environment_lock: environment-report-metrics.lock.txt
+  exact_environment_lock_sha256: 3f1fa7cea4933222b794e3f9d0187d96634eb024caff8109c8ccd05ac23f60ef
+
+metrics:
+  - radgraph
+  - ratescore
+  - radcliq
+
+interpretation:
+  radgraph_simple: higher_is_better
+  radgraph_partial: higher_is_better
+  radgraph_complete: higher_is_better
+  ratescore: higher_is_better
+  radcliq_v1_raw_mean: lower_is_better
+  radcliq_v1_inverse_mean: higher_is_better
+
+domain_warning: >-
+  RadGraph, RaTEScore, and RadCliQ were developed primarily for chest-radiograph reports.
+  They are secondary metrics here; the project-specific neuro-oncology finding schema is the
+  primary automated endpoint and remains explicitly pending radiologist validation.

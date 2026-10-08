@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TumorTrust-VLM radiologist score",
+  "type": "object",
+  "required": [
+    "reader_id",
+    "blinded_case_id",
+    "factual_correctness",
+    "completeness",
+    "clinically_significant_error_or_omission",
+    "potentially_harmful_error",
+    "unsupported_statement",
+    "quantitative_contradiction",
+    "laterality_contradiction",
+    "usefulness",
+    "required_editing"
+  ],
+  "properties": {
+    "reader_id": {"type": "string"},
+    "blinded_case_id": {"type": "string"},
+    "factual_correctness": {"enum": ["no_error", "minor_error", "major_error"]},
+    "completeness": {"enum": ["no_important_omission", "minor_omission", "major_omission"]},
+    "clinically_significant_error_or_omission": {"type": "boolean"},
+    "potentially_harmful_error": {"type": "boolean"},
+    "unsupported_statement": {"type": "boolean"},
+    "unsupported_span": {"type": ["string", "null"]},
+    "quantitative_contradiction": {"type": "boolean"},
+    "laterality_contradiction": {"type": "boolean"},
+    "usefulness": {"type": "integer", "minimum": 1, "maximum": 5},
+    "required_editing": {"enum": ["none", "minor", "major", "rewrite"]},
+    "questionable_reference_or_mask": {"type": "boolean", "default": false},
+    "notes": {"type": "string"}
+  },
+  "additionalProperties": false
+}
+

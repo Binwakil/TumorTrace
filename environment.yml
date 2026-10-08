@@ -1,0 +1,25 @@
+name: tumortrust-vlm
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pytorch=2.10
+  - pytorch-cuda=12.8
+  - monai=1.5
+  - nibabel=5.4
+  - numpy=1.26
+  - scipy=1.15
+  - scikit-learn=1.2
+  - pandas=2.3
+  - pyyaml=6.0
+  - pytest
+  - pip
+  - pip:
+      - transformers==4.36.2
+      - peft==0.4.0
+      - accelerate==0.21.0
+      - bert-score==0.3.13
+      - nnunetv2==2.8.1
+      - BraTS-evaluation==0.0.10

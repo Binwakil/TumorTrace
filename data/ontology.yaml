@@ -1,0 +1,40 @@
+version: 2
+approval_status: official_numeric_semantics_verified_clinical_wording_pending
+common_deployable_target: WT
+cohorts:
+  GLI:
+    source: Local BraTS-GLI export using the BraTS 2023 continuous 0-3 convention
+    provenance_note: AutoRG-Brain documentation also describes its report-source subset as BraTS2021; exact upstream release receipt remains a governance item.
+    labels:
+      0: background
+      1: non_enhancing_necrotic_tumor_core
+      2: surrounding_non_enhancing_flair_hyperintensity
+      3: enhancing_tumor
+    derived: {WT: [1, 2, 3], TC: [1, 3], ET: [3], SNFH: [2]}
+  MEN:
+    source: BraTS 2023 Intracranial Meningioma
+    labels:
+      0: background
+      1: non_enhancing_tumor_core
+      2: surrounding_non_enhancing_flair_hyperintensity
+      3: enhancing_tumor
+    derived: {WT: [1, 2, 3], TC: [1, 3], ET: [3], SNFH: [2]}
+  MET:
+    source: BraTS 2023 Brain Metastases
+    labels:
+      0: background
+      1: necrotic_tumor_core
+      2: surrounding_non_enhancing_flair_hyperintensity
+      3: enhancing_tumor
+      4: legacy_enhancing_tumor_mapped_to_3
+    derived: {WT: [1, 2, 3, 4], TC: [1, 3, 4], ET: [3, 4], SNFH: [2]}
+notes:
+  - Numeric compatibility does not imply identical biological meaning across cohorts.
+  - WT is the only unconditional cross-pathology target until clinical ontology review.
+  - Label 2 is called SNFH, not edema, in cross-cohort outputs.
+  - All eligible local masks use labels 0-3; legacy label 4 support exists only as a defensive conversion.
+references:
+  glioma_annotation_protocol: https://pmc.ncbi.nlm.nih.gov/articles/PMC10312814/
+  meningioma_task_paper: https://arxiv.org/abs/2305.07642
+  meningioma_organizer_confirmation: https://www.synapse.org/Synapse:syn51156910/discussion/threadId=11038
+  metastasis_task_paper: https://pmc.ncbi.nlm.nih.gov/articles/PMC10312806/

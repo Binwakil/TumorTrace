@@ -1,0 +1,22 @@
+amendment_version: tumortrust_vlm_decoder_evaluation_amendment_v1
+status: locked_before_any_7b_validation_output
+base_protocol: configs/vlm_decoder_comparison.yaml
+base_protocol_sha256: 37746409fa8286c694db6bc703ec9cbe9d193d0da60a7fa18063074012380445
+reason: >-
+  The initial evaluator defaulted to 128 generated tokens even though the reporter target lock and
+  training sequence length were 256. The mismatch was detected while the first validation
+  generations were still running; both were stopped before either wrote a prediction or aggregate
+  result. Training hyperparameters and completed text-only checkpoints were unaffected.
+correction:
+  maximum_new_tokens: 256
+  evaluation_batch_size: 4
+unchanged:
+  - models
+  - train_and_validation_subjects
+  - reporter_targets
+  - prompt
+  - training_hyperparameters
+  - decoding_strategy_greedy
+  - metrics
+  - gates
+locked_final_test_opened: false
